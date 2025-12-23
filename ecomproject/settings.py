@@ -12,7 +12,13 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'www.petukhotel.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','petukhotel.com', 'www.petukhotel.com']
+
+CSRF_TRUSTED_ORIGINS = [
+   
+    'https://petukhotel.com',
+    'https://www.petukhotel.com',
+]
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -76,12 +82,13 @@ WSGI_APPLICATION = 'ecomproject.wsgi.application'
 
 DATABASES = {
      'default': { 
-        'ENGINE': 'django.db.backends.mysql', 
+        'ENGINE': 'django.db.backends.postgresql', 
         'NAME': env('DB_NAME'), 
         'USER': env('DB_USER'), 
         'PASSWORD': env('DB_PASSWORD'), 
         'HOST': env('DB_HOST', default='127.0.0.1'), 
         'PORT': env('DB_PORT', default='3306'), 
+        'CONN_MAX_AGE': 300, # persistent connections
     } 
         
 }
@@ -123,11 +130,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'https://petukhotel.com',
-    'https://www.petukhotel.com',
-]
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
