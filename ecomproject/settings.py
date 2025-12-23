@@ -1,6 +1,7 @@
 import environ
 from pathlib import Path
 import os
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,13 +13,13 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['petukhotel.com', 'www.petukhotel.com', 'petuk-hotel-django.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1','petukhotel.com', 'www.petukhotel.com', 'petuk-hotel-django.onrender.com']
 
 
 CSRF_TRUSTED_ORIGINS = [
-   
     'https://petukhotel.com',
     'https://www.petukhotel.com',
+    'https://petuk-hotel-django.onrender.com',
 ]
 
 INSTALLED_APPS = [
@@ -80,19 +81,41 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecomproject.wsgi.application'
 
 
+if env('DATABASE_URL', default=None):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=env('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=False
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST', default='127.0.0.1'),
+            'PORT': env('DB_PORT', default='5432'),
+        }
+    }
 
-DATABASES = {
-     'default': { 
-        'ENGINE': 'django.db.backends.postgresql', 
-        'NAME': env('DB_NAME'), 
-        'USER': env('DB_USER'), 
-        'PASSWORD': env('DB_PASSWORD'), 
-        'HOST': env('DB_HOST', default='127.0.0.1'), 
-        'PORT': env('DB_PORT', default='3306'), 
-        'CONN_MAX_AGE': 300, # persistent connections
-    } 
+
+
+
+# DATABASES = {
+#      'default': { 
+#         'ENGINE': 'django.db.backends.postgresql', 
+#         'NAME': env('DB_NAME'), 
+#         'USER': env('DB_USER'), 
+#         'PASSWORD': env('DB_PASSWORD'), 
+#         'HOST': env('DB_HOST', default='127.0.0.1'), 
+#         'PORT': env('DB_PORT', default='3306'), 
+#         'CONN_MAX_AGE': 300, # persistent connections
+#     } 
         
-}
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
