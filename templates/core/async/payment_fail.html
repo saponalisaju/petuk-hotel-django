@@ -1,0 +1,15 @@
+{% load static %}
+{% load bangla_format %}
+
+{% block title %}Payment Failed{% endblock title %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'assets/css/payment.css' %}">
+
+<div class="container">
+    <h1>Payment Failed ❌</h1>
+    <p>দুঃখিত, আপনার লেনদেন সম্পন্ন হয়নি। আবার চেষ্টা করুন।</p>
+    <p>মোট মূল্য: {{ order.price|bangla_currency }}</p>
+    <a href="{% url 'core:checkout' %}">চেকআউটে ফিরে যান</a>
+</div>
+{% endblock content %}

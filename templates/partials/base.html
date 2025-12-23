@@ -1,0 +1,466 @@
+{% load static %}
+{% load bangla_format %}
+
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <meta
+      name="description"
+      content="Valleys is Full-Stack Django ecommerce website. Source code: https://github.com/kolosochok/django-ecommerce."
+    /> -->
+    <meta
+      name="keywords"
+      content="Valleys, Django, Creative, Ecommerce, Online-shop"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>{% block title %} পেটুক হোটেল {% endblock title %}</title>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&display=swap"
+      rel="stylesheet"
+    />
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      href="{% static './assets/img/favicon.ico' %}"
+      type="image/x-icon"
+    />
+
+    <!-- Css Styles -->
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/bootstrap.min.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/font-awesome.min.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/elegant-icons.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/nice-select.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/jquery-ui.min.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/owl.carousel.min.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/slicknav.min.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static './assets/css/style.css' %}"
+      type="text/css"
+    />
+  </head>
+
+  <body>
+    <!-- Page Preloder -->
+    <div id="preloder">
+      <div class="loader"></div>
+    </div>
+
+    <!-- Humberger Begin -->
+    <div class="humberger__menu__overlay"></div>
+    <div class="humberger__menu__wrapper">
+      <div class="humberger__menu__logo">
+        <a href="{% url 'core:index' %}"
+          ><img src="{% static './assets/img/logo.svg' %}" alt=""
+        /></a>
+      </div>
+      <div class="humberger__menu__cart">
+        <ul>
+          {% if wishlist %}
+          <li>
+            <a href="{% url 'core:wishlist' %}"
+              ><i class="fa fa-heart"></i>
+              <span class="wishlist-items-count">{{ wishlist.count }}</span></a
+            >
+          </li>
+          {% else %}
+          <li>
+            <a href="{% url 'core:wishlist' %}"
+              ><i class="fa fa-heart"></i>
+              <span class="wishlist-items-count">0</span></a
+            >
+          </li>
+          {% endif %}
+          <li>
+            <a href="{% url 'core:cart' %}"
+              ><i class="fa fa-shopping-bag"></i>
+              <span class="cart-items-count"
+                >{{ request.session.cart_data_object|length }}</span
+              ></a
+            >
+          </li>
+        </ul>
+        <div class="header__cart__price">
+          item: <span>${{ cart_total_amount|floatformat:2 }}</span>
+        </div>
+      </div>
+      <div class="humberger__menu__widget">
+        <div class="header__top__right__language">
+          <img src="{% static './assets/img/language.png' %}" alt="" />
+          <div>ইংরেজি</div>
+          <span class="arrow_carrot-down"></span>
+          <ul>
+            <li><a href="#">বাংলা</a></li>
+            <li><a href="#">ইংরেজি</a></li>
+          </ul>
+        </div>
+        {% if request.user.is_authenticated %}
+        <div style="margin-left: 15px" class="header__top__right__auth">
+          <div>
+            <i class="fa fa-user"></i>{{ user.username|truncatechars:8 }}
+          </div>
+          <span class="arrow_carrot-down"></span>
+          <ul>
+            <li><a href="{% url 'userauths:account' %}">আমার অ্যাকাউন্ট</a></li>
+            <li><a href="{% url 'core:wishlist' %}">আমার ইচ্ছা তালিকা</a></li>
+            <li>
+              <a href="{% url 'userauths:sing-out' %}"
+                ><i class="fa fa-sign-out"></i>সাইন আউট করুন</a
+              >
+            </li>
+          </ul>
+        </div>
+        {% else %}
+        <div style="margin-left: 15px" class="header__top__right__auth">
+          <a href="{% url 'userauths:sing-in' %}"
+            ><i class="fa fa-user"></i>সাইন ইন করুন</a
+          >
+        </div>
+        {% endif %}
+      </div>
+      <nav class="humberger__menu__nav mobile-menu">
+        <ul>
+          <li class="active"><a href="{% url 'core:index' %}">বাড়ি</a></li>
+          <li>
+            <a href="{% url 'core:products-list' %}">দোকান</a>
+            <ul class="header__menu__dropdown">
+              <li><a href="{% url 'core:category-list' %}">ক্যাটাগরি</a></li>
+              <li><a href="{% url 'core:vendor-list' %}">বিক্রেতারা</a></li>
+              <li><a href="{% url 'core:products-list' %}">পণ্য</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="{% url 'core:about' %}">পাতা</a>
+            <ul class="header__menu__dropdown">
+              <li><a href="{% url 'core:about' %}">আমাদের সম্পর্কে</a></li>
+            </ul>
+          </li>
+          <li><a href="{% url 'blog:blog' %}">ব্লগ</a></li>
+          <li><a href="{% url 'core:contact' %}">যোগাযোগ</a></li>
+        </ul>
+      </nav>
+      <div id="mobile-menu-wrap"></div>
+      <div class="header__top__right__social">
+        <a href="#"><i class="fa fa-facebook"></i></a>
+        <a href="#"><i class="fa fa-twitter"></i></a>
+        <a href="#"><i class="fa fa-linkedin"></i></a>
+        <a href="#"><i class="fa fa-pinterest-p"></i></a>
+      </div>
+      <div class="humberger__menu__contact">
+        <ul>
+          <li><i class="fa fa-envelope"></i> manikkibrya@gmail.com</li>
+          <li>সকল অর্ডারের জন্য বিনামূল্যে শিপিং, ২৫% ছাড়</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Humberger End -->
+
+    <!-- Header Section Begin -->
+    <header class="header">
+      <div class="header__top">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-6 col-md-6">
+              <div class="header__top__left">
+                <ul>
+                  <li><i class="fa fa-envelope"></i> manikkibrya@gmail.com</li>
+                  <li>সকল অর্ডারের জন্য বিনামূল্যে শিপিং, ২৫% ছাড়</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+              <div class="header__top__right">
+                <div class="header__top__right__social">
+                  <a href="#"><i class="fa fa-facebook"></i></a>
+                  <a href="#"><i class="fa fa-twitter"></i></a>
+                  <a href="#"><i class="fa fa-linkedin"></i></a>
+                  <a href="#"><i class="fa fa-pinterest-p"></i></a>
+                </div>
+                <div class="header__top__right__language">
+                  <img src="{% static './assets/img/language.png' %}" alt="" />
+                  <div>ইংরেজি</div>
+                  <span class="arrow_carrot-down"></span>
+                  <ul>
+                    <li><a href="#">বাংলা</a></li>
+                    <li><a href="#">ইংরেজি</a></li>
+                  </ul>
+                </div>
+                {% if request.user.is_authenticated %}
+                <div class="header__top__right__auth">
+                  <div><i class="fa fa-user"></i>{{user.username}}</div>
+                  <span class="arrow_carrot-down"></span>
+                  <ul>
+                    <li>
+                      <a href="{% url 'userauths:account' %}">আমার অ্যাকাউন্ট</a>
+                    </li>
+                    <li><a href="{% url 'core:wishlist' %}">আমার ইচ্ছা তালিকা</a></li>
+                    <li>
+                      <a href="{% url 'userauths:sing-out' %}"
+                        ><i class="fa fa-sign-out"></i>সাইন আউট করুন</a
+                      >
+                    </li>
+                  </ul>
+                </div>
+                {% else %}
+                <div class="header__top__right__auth">
+                  <a href="{% url 'userauths:sing-in' %}"
+                    ><i class="fa fa-sign-in"></i>সাইন ইন করুন</a
+                  >
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row ">
+          <div class="col-lg-3">
+            <div class="header__logo">
+              <a href="{% url 'core:index' %}"
+                ><img src="{% static './assets/img/logo.svg' %}" alt=""
+              /></a>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <nav class="header__menu">
+              <ul>
+                <li class="{% if request.path == '/' %}active{% endif %}">
+                  <a href="{% url 'core:index' %}">বাড়ি</a>
+                </li>
+                <li
+                  class="{% if request.path == '/products/' or request.path == '/category/' or request.path == '/vendors/' %}active{% endif %}"
+                >
+                  <a href="{% url 'core:products-list' %}">দোকান</a>
+                  <ul class="header__menu__dropdown">
+                    <li class="submenu">
+                      <a href="{% url 'core:category-list' %}">ক্যাটাগরি</a>
+                      <ul class="header__submenu">
+                        {% for c in categories %}
+                        <li>
+                          <a href="{% url 'core:category-product-list' c.cid %}"
+                            >{{ c.title }}</a
+                          >
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                    <li class="submenu">
+                      <a href="{% url 'core:vendor-list' %}">বিক্রেতারা</a>
+                      <ul class="header__submenu">
+                        {% for v in vendors %}
+                        <li>
+                          <a href="{% url 'core:vendor-detail' v.vid %}"
+                            >{{ v.title }}</a
+                          >
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="{% url 'core:products-list' %}">পণ্য</a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="{% if request.path == '/about/' %}active{% endif %}">
+                  <a href="{% url 'core:about' %}">পাতা</a>
+                  <ul class="header__menu__dropdown">
+                    <li><a href="{% url 'core:about' %}">আমাদের সম্পর্কে</a></li>
+                  </ul>
+                </li>
+                <li class="{% if request.path == '/blog/' %}active{% endif %}">
+                  <a href="{% url 'blog:blog' %}">ব্লগ</a>
+                </li>
+                <li
+                  class="{% if request.path == '/contact/' %}active{% endif %}"
+                >
+                  <a href="{% url 'core:contact' %}">যোগাযোগ</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          <div class="col-lg-3">
+            <div class="header__cart">
+              <ul>
+                {% if wishlist %}
+                <li>
+                  <a href="{% url 'core:wishlist' %}"
+                    ><i class="fa fa-heart"></i>
+                    <span class="wishlist-items-count"
+                      >{{ wishlist.count|bangla_number }}</span
+                    ></a
+                  >
+                </li>
+                {% else %}
+                <li>
+                  <a href="{% url 'core:wishlist' %}"
+                    ><i class="fa fa-heart"></i>
+                    <span class="wishlist-items-count">0</span></a
+                  >
+                </li>
+                {% endif %}
+                <li>
+                  <a href="{% url 'core:cart' %}"
+                    ><i class="fa fa-shopping-bag"></i>
+                    <span class="cart-items-count"
+                      >{{ request.session.cart_data_object|length|bangla_number }}</span
+                    ></a
+                  >
+                </li>
+              </ul>
+              <div class="header__cart__price">
+                আইটেম: <span>{{ cart_total_amount|bangla_currency }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="humberger__open">
+          <i class="fa fa-bars"></i>
+        </div>
+      </div>
+    </header>
+    <!-- Header Section End -->
+
+    {% block content %} {% endblock content %}
+
+    <!-- Footer Section Begin -->
+    <footer class="footer spad">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-3 col-md-6 col-sm-6">
+            <div class="footer__about">
+              <div class="footer__about__logo">
+                <a href="{% url 'core:index' %}"
+                  ><img src="{% static './assets/img/logo.svg' %}" alt=""
+                /></a>
+              </div>
+              <ul>
+                {% comment %}
+                <li>ঠিকানা: নিতাই, কিশোরীগাং, নীলফামারী</li>
+                {% endcomment %}
+               <li>ফোন: +৮৮০ ০১৭ ৫০৩ ৬১৫ ৮৫</li>
+               <li>ইমেল: manikkibrya@gmail.com</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-6 offset-lg-1">
+            <div class="footer__widget">
+              <h6>দরকারী লিঙ্ক</h6>
+             <ul>
+               <li><a href="#">আমাদের সম্পর্কে</a></li>
+               <li><a href="#">আমাদের দোকান সম্পর্কে</a></li>
+               <li><a href="#">নিরাপদ কেনাকাটা</a></li>
+               <li><a href="#">ডেলিভারি তথ্য</a></li>
+               <li><a href="#">গোপনীয়তা নীতি</a></li>
+               <li><a href="#">আমাদের সাইটম্যাপ</a></l>
+             </ul>
+             <ul>
+              <li><a href="#">আমরা কারা</a></li>
+              <li><a href="#">আমাদের পরিষেবা</a></li>
+              <li><a href="#">প্রকল্প</a></li>
+              <li><a href="{% url 'core:contact' %}">যোগাযোগ</a></li>
+              <li><a href="#">উদ্ভাবন</a></li>
+              <li><a href="#">প্রশংসাপত্র</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-12">
+            <div class="footer__widget">
+              <h6>এখন আমাদের নিউজলেটার যোগদান</h6>
+              <p>
+                আমাদের সর্বশেষ দোকান এবং বিশেষ অফার সম্পর্কে ই-মেইল আপডেট পান।
+              </p>
+              <form action="#">
+                <input type="text" placeholder="Enter your mail" />
+                <button type="submit" class="site-btn">সদস্যতা</button>
+              </form>
+              <div class="footer__widget__social">
+                <a href="#"><i class="fa fa-facebook"></i></a>
+                <a href="#"><i class="fa fa-instagram"></i></a>
+                <a href="#"><i class="fa fa-twitter"></i></a>
+                <a href="#"><i class="fa fa-pinterest"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="footer__copyright">
+              <div class="footer__copyright__text">
+                <p>
+                  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                  কপিরাইট &copy;
+                  <script>
+                    document.write(new Date().getFullYear());
+                  </script>
+                 সর্বস্বত্ব সংরক্ষিত | এই টেমপ্লেটটি তৈরি করা হয়েছে
+                  <i class="fa fa-heart" aria-hidden="true"></i> দ্বারা
+                  <a href="https://colorlib.com" target="_blank">মো: কিবরিয়া </a>
+                  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                </p>
+              </div>
+              <div class="footer__copyright__payment">
+                <img
+                  src="{% static './assets/img/payment-item.png' %}"
+                  alt=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- Footer Section End -->
+
+    <!-- Js Plugins -->
+    <script src="{% static './assets/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static './assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static './assets/js/jquery.nice-select.min.js' %}"></script>
+    <script src="{% static './assets/js/jquery-ui.min.js' %}"></script>
+    <script src="{% static './assets/js/jquery.slicknav.js' %}"></script>
+    <script src="{% static './assets/js/mixitup.min.js' %}"></script>
+    <script src="{% static './assets/js/owl.carousel.min.js' %}"></script>
+    <script src="{% static './assets/js/main.js' %}"></script>
+    <script src="{% static './assets/js/function.js' %}"></script>
+  </body>
+</html>

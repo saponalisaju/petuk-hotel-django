@@ -1,0 +1,55 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block title %}Checkout{% endblock title %}
+
+{% block content %}
+
+
+  {% if errors %}
+  <ul class="error-list">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+{% endif %}
+
+<div class="checkout-container">
+  <div class="shipping-form">
+    <h3>Shipping details</h3>
+    <form method="post">
+      {% csrf_token %}
+      <label>Full name</label>
+      <input type="text" name="full_name" value="{{ form.full_name|default:'' }}" required>
+
+      <label>Phone</label>
+      <input type="text" name="phone" value="{{ form.phone|default:'' }}" required>
+
+      <label>Address</label>
+      <input type="text" name="address" value="{{ form.address|default:'' }}" required>
+
+      <label>City</label>
+      <input type="text" name="city" value="{{ form.city|default:'' }}">
+
+      <label>Country</label>
+      <input type="text" name="country" value="{{ form.country|default:'Bangladesh' }}">
+
+      <label>Notes</label>
+      <textarea name="notes">{{ form.notes|default:'' }}</textarea>
+
+      <button type="submit" class="btn-submit">Place order</button>
+    </form>
+  </div>
+  <div class="order-summary">
+    <h3>Order summary</h3>
+    <ul>
+      {% for pid, item in cart.items %}
+        <li>{{ item.name }} x {{ item.qty }} — {{ item.price }} BDT</li>
+      {% endfor %}
+    </ul>
+    <p>Subtotal: {{ subtotal }}</p>
+    <p>Shipping: {{ shipping }}</p>
+    <p><strong>Total: {{ total }} BDT</strong></p>
+  </div>
+</div>
+
+  
+{% endblock content %}

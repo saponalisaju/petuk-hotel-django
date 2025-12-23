@@ -1,0 +1,15 @@
+{% load static %}
+{% load bangla_format %}
+
+{% block title %}Payment Cancelled{% endblock title %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'assets/css/payment.css' %}">
+
+<div class="container">
+    <h1>Payment Cancelled 🚫</h1>
+    <p>আপনার লেনদেন বাতিল করা হয়েছে। কোনো টাকা কাটা হয়নি।</p>
+    <p>মোট মূল্য: {{ order.price|bangla_currency }}</p>
+    <a href="{% url 'core:checkout' %}">আবার চেষ্টা করুন</a>
+</div>
+{% endblock content %}
