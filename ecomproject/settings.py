@@ -12,7 +12,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','petukhotel.com', 'www.petukhotel.com']
+ALLOWED_HOSTS = ['petukhotel.com', 'www.petukhotel.com', 'petuk-hotel-django.onrender.com']
+
 
 CSRF_TRUSTED_ORIGINS = [
    
