@@ -29,7 +29,6 @@ urlpatterns = [
     path('', include(('core.urls', 'core'), namespace='core')),
     path('blog/', include(('blog.urls', 'blog'), namespace='blog')),
     path('user/', include(('userauths.urls', 'userauths'), namespace='userauths')),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 

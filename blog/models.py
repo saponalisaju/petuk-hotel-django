@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.html import mark_safe
 from userauths.models import User
-from ckeditor_uploader.fields import RichTextUploadingField
+from django_ckeditor_5.fields import CKEditor5Field
 from taggit.managers import TaggableManager
 from shortuuid.django_fields import ShortUUIDField
 
@@ -35,7 +35,7 @@ class Post(models.Model):
 	title = models.CharField(max_length=100, default="Post Name")
 	subtitle = models.TextField(null=True, blank=True, default="Post Subtitle")
 	
-	body = RichTextUploadingField(null=True, blank=True, default="Post Body")
+	body = CKEditor5Field( config_name='default', null=True, blank=True, default="Post Body" )
 
 	post_status = models.CharField(choices=STATUS, max_length=10, default="in_review")
 	date_created = models.DateTimeField(auto_now_add=True)

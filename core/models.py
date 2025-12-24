@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.html import mark_safe
 from userauths.models import User
-from ckeditor_uploader.fields import RichTextUploadingField
+from django_ckeditor_5.fields import CKEditor5Field
 from taggit.managers import TaggableManager
 from shortuuid.django_fields import ShortUUIDField
 from cloudinary.models import CloudinaryField
@@ -79,7 +79,7 @@ class Vendor(models.Model):
     
     title = models.CharField(max_length=100, default="Vendor Name")
     image = CloudinaryField('image',folder='petuk-hotel/vendor/', default="vendor.jpg")
-    description = RichTextUploadingField(null=True, blank=True, default="Vendor Description")
+    description = CKEditor5Field( config_name='default', null=True, blank=True, default="Vendor Description" )
 
     address = models.CharField(max_length=100, default="123 Main Street")
     contact = models.CharField(max_length=100, default="+123 (456) 789")
@@ -132,12 +132,12 @@ class Product(models.Model):
 
     title = models.CharField(max_length=100, default="Product Name")
     image = CloudinaryField('image', folder='petuk-hotel/product/', default="product.jpg")
-    description = RichTextUploadingField(null=True, blank=True, default="Product Description")
+    description = CKEditor5Field( config_name='default', null=True, blank=True, default="Product Description" )
 
     price = models.DecimalField(max_digits=10, decimal_places=2, default=30)
     old_price = models.DecimalField(max_digits=10, decimal_places=2, default=50)
 
-    specifications = RichTextUploadingField(null=True, blank=True)
+    specifications = CKEditor5Field( config_name='default', null=True, blank=True )
     stock_count = models.PositiveIntegerField(default=10, null=True, blank=True)
     shipping = models.CharField(max_length=100, default=1, null=True, blank=True)
     weight = models.CharField(max_length=100, default=0.5, null=True, blank=True)

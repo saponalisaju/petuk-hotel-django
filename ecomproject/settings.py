@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 
     # Third Party
     'taggit',
-    'ckeditor',
+    'django_ckeditor_5',
     'easyaudit',
 
     # Custom Apps
@@ -177,8 +177,18 @@ LOGIN_URL = 'userauths:sign-in'  # check spelling in your urls.py
 
 AUTH_USER_MODEL = 'userauths.User'
 
-CKEDITOR_CONFIGS = {
+CKEDITOR_5_CONFIGS = {
     'default': {
         'skin': 'moono',
     }
+}
+
+CKEDITOR_5_CONFIGS = { 
+    'default': { 
+        'toolbar': [ 
+            'heading', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough', '|', 
+            'bulletedList', 'numberedList', 'blockQuote', '|', 'insertTable', 'mediaEmbed', 'undo', 'redo' 
+            ], 
+            'height': 300, 'width': '100%', 
+    }, 
 }
