@@ -431,7 +431,7 @@ def initiate_payment(request):
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
 
     # Callback URLs: sandbox vs production
-    if settings.SSLCOMMERZ['sandbox']:
+    if settings.SSLCOMMERZ['issandbox']:
         success_url = request.build_absolute_uri('/payment/success/')
         fail_url    = request.build_absolute_uri('/payment/fail/')
         cancel_url  = request.build_absolute_uri('/payment/cancel/')

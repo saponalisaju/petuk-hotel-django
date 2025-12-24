@@ -140,8 +140,8 @@ CKEDITOR_UPLOAD_PATH = 'uploads/'
 
 SSLCOMMERZ = {
     'store_id': env('SSLC_STORE_ID'),
-    'store_passwd': env('SSLC_STORE_PASS'),
-    'sandbox': env('SSLC_IS_SANDBOX'),  # False for production
+    'store_pass': env('SSLC_STORE_PASS'),
+    'issandbox': env('SSLC_IS_SANDBOX'),  # False for production
 }
 
 LANGUAGE_CODE = 'bn'
