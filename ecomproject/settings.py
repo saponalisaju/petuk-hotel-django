@@ -86,7 +86,7 @@ if env('DATABASE_URL', default=None):
         'default': dj_database_url.config(
             default=env('DATABASE_URL'),
             conn_max_age=600,
-            ssl_require=False
+            ssl_require=True
         )
     }
 else:
@@ -140,8 +140,8 @@ CKEDITOR_UPLOAD_PATH = 'uploads/'
 
 SSLCOMMERZ = {
     'store_id': env('SSLC_STORE_ID'),
-    'store_pass': env('SSLC_STORE_PASS'),
-    'issandbox': env('SSLC_IS_SANDBOX'),  # False for production
+    'store_passwd': env('SSLC_STORE_PASS'),
+    'sandbox': env('SSLC_IS_SANDBOX'),  # False for production
 }
 
 LANGUAGE_CODE = 'bn'

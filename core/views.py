@@ -423,24 +423,30 @@ def initiate_payment(request):
     form = request.session.get('checkout_form', {})
     cart_total = order.price
 
+    # Unique transaction ID
     tran_id = f"TXN-{order.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}"
-    order.tran_id = tran_id 
+    order.tran_id = tran_id
     order.save(update_fields=['tran_id'])
 
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
 
-    # Always use your domain for callback URLs 
-    success_url = "https://www.petukhotel.com/payment/success/" 
-    fail_url = "https://www.petukhotel.com/payment/fail/" 
-    cancel_url = "https://www.petukhotel.com/payment/cancel/"
+    # Callback URLs: sandbox vs production
+    if settings.SSLCOMMERZ['sandbox']:
+        success_url = request.build_absolute_uri('/payment/success/')
+        fail_url    = request.build_absolute_uri('/payment/fail/')
+        cancel_url  = request.build_absolute_uri('/payment/cancel/')
+    else:
+        success_url = "https://www.petukhotel.com/payment/success/"
+        fail_url    = "https://www.petukhotel.com/payment/fail/"
+        cancel_url  = "https://www.petukhotel.com/payment/cancel/"
 
     post_body = {
         'total_amount': str(cart_total),
         'currency': "BDT",
         'tran_id': tran_id,
-        'success_url': success_url, # for dev request.build_absolute_uri('/payment/success/')
-        'fail_url': fail_url, # for dev request.build_absolute_uri('/payment/fail/')
-        'cancel_url': cancel_url, # for dev request.build_absolute_uri('/payment/cancel/')
+        'success_url': success_url,
+        'fail_url': fail_url,
+        'cancel_url': cancel_url,
         'emi_option': 0,
         'cus_name': form.get('full_name') or request.user.get_full_name() or request.user.username,
         'cus_email': request.user.email or 'customer@example.com',
@@ -457,11 +463,13 @@ def initiate_payment(request):
 
     try:
         response = sslcz.createSession(post_body)
+        if 'GatewayPageURL' not in response:
+            messages.error(request, f"GatewayPageURL missing: {response}")
+            return redirect('core:checkout')
         return redirect(response['GatewayPageURL'])
     except Exception as e:
         messages.error(request, f"Payment initiation failed: {e}")
         return redirect('core:checkout')
-
 
 
 @csrf_exempt
