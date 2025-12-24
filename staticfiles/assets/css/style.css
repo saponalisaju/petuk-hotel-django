@@ -276,6 +276,12 @@ ol {
   Header
 -----------------------*/
 
+.logo-img {
+  width: 150px;   /* আপনার পছন্দমতো */
+  height: auto;   /* aspect ratio ঠিক রাখবে */
+}
+
+
 .header__top {
 	background: #f5f5f5;
 }
@@ -628,7 +634,7 @@ ol {
 }
 
 .hero__categories__all {
-	background: #7fad39;
+	background: #a82110;
 	position: relative;
 	padding: 10px 25px 10px 40px;
 	cursor: pointer;
@@ -3494,7 +3500,7 @@ ol {
 		display: none;
 	}
 	.header__cart {
-		text-align: center;
+		
 		padding: 10px 0 24px;
 	}
 	.over_hid {

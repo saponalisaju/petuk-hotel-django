@@ -212,34 +212,47 @@ def filter_product(request):
 	data = render_to_string('core/async/product-list.html', context)
 	return JsonResponse({'data': data})
 
+
 def add_to_cart(request):
-	cart_product = {}
+    product_id = str(request.GET.get('id'))
 
-	cart_product[str(request.GET['id'])] = {
-		'qty': request.GET['qty'],
-		'title': request.GET['title'],
-		'price': request.GET['price'],
-		'image': request.GET['image'],
-		'pid': request.GET['pid'],
-	}
+    try:
+        qty = int(request.GET.get('qty', 1))
+    except (ValueError, TypeError):
+        qty = 1
 
-	if 'cart_data_object' in request.session:
-		if str(request.GET['id']) in request.session['cart_data_object']:
-			cart_data = request.session['cart_data_object']
-			cart_data[str(request.GET['id'])]['qty'] = int(cart_product[str(request.GET['id'])]['qty'])
-			cart_data.update(cart_data)
-			request.session['cart_data_object'] = cart_data
-		else:
-			cart_data = request.session['cart_data_object']
-			cart_data.update(cart_product)
-			request.session['cart_data_object'] = cart_data
-	else:
-		request.session['cart_data_object'] = cart_product
+    try:
+        price = float(request.GET.get('price', 0))
+    except (ValueError, TypeError):
+        price = 0.0
 
-	return JsonResponse({
-			'data':request.session['cart_data_object'],
-			'totalcartitems':len(request.session['cart_data_object'])
-		})
+    cart_product = {
+        product_id: {
+            'qty': qty,
+            'title': request.GET.get('title', ''),
+            'price': price,
+            'image': request.GET.get('image', ''),
+            'pid': request.GET.get('pid', ''),
+        }
+    }
+
+    if 'cart_data_object' in request.session:
+        cart_data = request.session['cart_data_object']
+        if product_id in cart_data:
+            cart_data[product_id]['qty'] += qty
+        else:
+            cart_data.update(cart_product)
+        request.session['cart_data_object'] = cart_data
+    else:
+        request.session['cart_data_object'] = cart_product
+
+    request.session.modified = True  # force save
+
+    return JsonResponse({
+        'data': request.session['cart_data_object'],
+        'totalcartitems': len(request.session['cart_data_object'])
+    })
+
 
 
 def cart_view(request):
@@ -260,6 +273,63 @@ def cart_view(request):
         'cart_total_amount': cart_total_amount,
     }
     return render(request, 'core/cart.html', context)
+
+
+
+def delete_from_cart(request):
+    product_id = str(request.GET.get('id'))
+    if 'cart_data_object' in request.session:
+        cart_data = request.session['cart_data_object']
+        if product_id in cart_data:
+            del cart_data[product_id]
+            request.session['cart_data_object'] = cart_data
+            request.session.modified = True
+
+    cart_total_amount = 0
+    for pid, item in request.session.get('cart_data_object', {}).items():
+        try:
+            cart_total_amount += int(item['qty']) * float(item['price'])
+        except (ValueError, TypeError):
+            cart_total_amount += 0
+
+    context = render_to_string('core/async/cart-list.html', {
+        'cart_data': request.session.get('cart_data_object', {}),
+        'totalcartitems': len(request.session.get('cart_data_object', {})),
+        'cart_total_amount': cart_total_amount
+    })
+    return JsonResponse({
+        'data': context,
+        'totalcartitems': len(request.session.get('cart_data_object', {})),
+    })
+
+
+def update_cart(request):
+    product_id = str(request.GET.get('id'))
+    product_qty = int(request.GET.get('qty', 1))
+    if 'cart_data_object' in request.session:
+        cart_data = request.session['cart_data_object']
+        if product_id in cart_data:
+            cart_data[product_id]['qty'] = product_qty
+            request.session['cart_data_object'] = cart_data
+            request.session.modified = True
+
+    cart_total_amount = 0
+    for pid, item in request.session.get('cart_data_object', {}).items():
+        try:
+            cart_total_amount += int(item['qty']) * float(item['price'])
+        except (ValueError, TypeError):
+            cart_total_amount += 0
+
+    context = render_to_string('core/async/cart-list.html', {
+        'cart_data': request.session.get('cart_data_object', {}),
+        'totalcartitems': len(request.session.get('cart_data_object', {})),
+        'cart_total_amount': cart_total_amount
+    })
+    return JsonResponse({
+        'data': context,
+        'totalcartitems': len(request.session.get('cart_data_object', {})),
+    })
+
 
 
 
@@ -322,7 +392,7 @@ def checkout_view(request):
                     order=order,
                     invoice_no=f"INV-{order.id}-{pid}",
                     product_status="processing",
-                    item=item.get('name') or item.get('title'),
+                    item=item.get('title') ,
                     image=item.get('image', ''),
                     qty=int(item['qty']),
                     price=Decimal(str(item['price'])),
@@ -358,13 +428,19 @@ def initiate_payment(request):
     order.save(update_fields=['tran_id'])
 
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
+
+    # Always use your domain for callback URLs 
+    success_url = "https://www.petukhotel.com/payment/success/" 
+    fail_url = "https://www.petukhotel.com/payment/fail/" 
+    cancel_url = "https://www.petukhotel.com/payment/cancel/"
+
     post_body = {
         'total_amount': str(cart_total),
         'currency': "BDT",
         'tran_id': tran_id,
-        'success_url': request.build_absolute_uri('/payment/success/'),
-        'fail_url': request.build_absolute_uri('/payment/fail/'),
-        'cancel_url': request.build_absolute_uri('/payment/cancel/'),
+        'success_url': success_url, # for dev request.build_absolute_uri('/payment/success/')
+        'fail_url': fail_url, # for dev request.build_absolute_uri('/payment/fail/')
+        'cancel_url': cancel_url, # for dev request.build_absolute_uri('/payment/cancel/')
         'emi_option': 0,
         'cus_name': form.get('full_name') or request.user.get_full_name() or request.user.username,
         'cus_email': request.user.email or 'customer@example.com',
@@ -384,7 +460,7 @@ def initiate_payment(request):
         return redirect(response['GatewayPageURL'])
     except Exception as e:
         messages.error(request, f"Payment initiation failed: {e}")
-        return redirect('checkout')
+        return redirect('core:checkout')
 
 
 
@@ -431,53 +507,7 @@ def order_success_view(request, order_id):
 
 
 
-def delete_from_cart(request):
-	product_id = str(request.GET['id'])
-	if 'cart_data_object' in request.session:
-		if product_id in request.session['cart_data_object']:
-			cart_data = request.session['cart_data_object']
-			del request.session['cart_data_object'][product_id]
-			request.session['cart_data_object'] = cart_data
 
-	cart_total_amount = 0
-	if 'cart_data_object' in request.session:
-		for product_id, item in request.session['cart_data_object'].items():
-			cart_total_amount += int(item['qty']) * float(item['price'])
-
-	context = render_to_string('core/async/cart-list.html', {
-			'cart_data': request.session['cart_data_object'],
-			'totalcartitems': len(request.session['cart_data_object']),
-			'cart_total_amount': cart_total_amount
-		})
-	return JsonResponse({
-			'data': context,
-			'totalcartitems': len(request.session['cart_data_object']),
-		})
-
-def update_cart(request):
-	product_id = str(request.GET['id'])
-	product_qty = request.GET['qty']
-	if 'cart_data_object' in request.session:
-		if product_id in request.session['cart_data_object']:
-			cart_data = request.session['cart_data_object']
-			cart_data[str(request.GET['id'])]['qty'] = product_qty
-			request.session['cart_data_object'] = cart_data
-
-	cart_total_amount = 0
-	if 'cart_data_object' in request.session:
-		for product_id, item in request.session['cart_data_object'].items():
-			cart_total_amount += int(item['qty']) * float(item['price'])
-
-
-	context = render_to_string('core/async/cart-list.html', {
-			'cart_data': request.session['cart_data_object'],
-			'totalcartitems': len(request.session['cart_data_object']),
-			'cart_total_amount': cart_total_amount
-		})
-	return JsonResponse({
-			'data': context,
-			'totalcartitems': len(request.session['cart_data_object']),
-		})
 
 @login_required
 def wishlist_view(request):

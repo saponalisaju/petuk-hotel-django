@@ -6,10 +6,12 @@
 {% block content %}
 
 
-  {% if errors %}
-  <ul class="error-list">
-    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
-  </ul>
+ {% if errors %} 
+ <ul class="error-list"> 
+  {% for e in errors %} 
+  <li style="color:red;">{{ e }}</li> 
+  {% endfor %} 
+</ul> 
 {% endif %}
 
 <div class="checkout-container">
@@ -42,7 +44,7 @@
     <h3>Order summary</h3>
     <ul>
       {% for pid, item in cart.items %}
-        <li>{{ item.name }} x {{ item.qty }} — {{ item.price }} BDT</li>
+        <li>{{ item.title }} x {{ item.qty }} — {{ item.price }} BDT</li>
       {% endfor %}
     </ul>
     <p>Subtotal: {{ subtotal }}</p>

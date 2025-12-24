@@ -29,7 +29,7 @@ def register_view(request):
 		'form': form
 	}
 
-	return render(request, 'userauths/sing-up.html', context)
+	return render(request, 'userauths/sign-up.html', context)
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -58,7 +58,7 @@ def login_view(request):
         except User.DoesNotExist:
             messages.warning(request, f"User with {email} does not exist!")
 
-    return render(request, 'userauths/sing-in.html')
+    return render(request, 'userauths/sign-in.html')
 
 def logout_view(request):
 	logout(request)
