@@ -340,7 +340,7 @@ def checkout_view(request):
         return redirect('core:cart')  # make sure 'cart' is named in urls.py
 
     subtotal = sum(Decimal(str(item['price'])) * int(item['qty']) for item in cart.values())
-    shipping = Decimal('80.00') if subtotal > 0 else Decimal('0.00')
+    shipping = Decimal('10.00') if subtotal > 0 else Decimal('0.00')
     total = subtotal + shipping
 
     if request.method == "POST":

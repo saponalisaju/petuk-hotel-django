@@ -1,5 +1,6 @@
 {% extends 'partials/base.html' %}
 {% load static %}
+{% load bangla_format %}
 
 {% block title %}Checkout{% endblock title %}
 
@@ -44,12 +45,12 @@
     <h3>Order summary</h3>
     <ul>
       {% for pid, item in cart.items %}
-        <li>{{ item.title }} x {{ item.qty }} — {{ item.price }} BDT</li>
+        <li>{{ item.title }} x {{ item.qty }} — {{ item.price|bangla_currency }}</li>
       {% endfor %}
     </ul>
-    <p>Subtotal: {{ subtotal }}</p>
-    <p>Shipping: {{ shipping }}</p>
-    <p><strong>Total: {{ total }} BDT</strong></p>
+    <p>Subtotal: {{ subtotal|bangla_currency }}</p>
+    <p>Shipping: {{ shipping|bangla_currency }}</p>
+    <p><strong>Total: {{ total|bangla_currency }} </strong></p>
   </div>
 </div>
 
