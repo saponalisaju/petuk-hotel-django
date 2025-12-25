@@ -336,7 +336,8 @@ def update_cart(request):
 def checkout_view(request):
     cart = request.session.get('cart_data_object', {})
     if not cart:
-		print("CART:", request.session.get('cart_data_object', {}))
+
+        print("CART:", request.session.get('cart_data_object', {}))
         return redirect('core:cart')  # make sure 'cart' is named in urls.py
 		
 
