@@ -414,27 +414,32 @@ def checkout_view(request):
 
 
 
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from decimal import Decimal
+from .models import CartOrder
+from sslcommerz_lib import SSLCOMMERZ  # আপনার SSLCommerz লাইব্রেরি import করুন
+from django.conf import settings
+
 @login_required
 def initiate_payment(request, order_id):
-    order_id = request.session.get('cart_order_id')
-	# 👉 এখানে বসান 
-    if not order_id: 
-        messages.error(request, "No order found in session") 
-        return redirect('core:checkout')
-
+    # URL থেকে আসা order_id দিয়ে order খুঁজুন
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)
 
+    # checkout form data session থেকে নিন
     form = request.session.get('checkout_form', {})
-    cart_total = order.price
 
-    # Unique transaction ID
+    # Unique transaction ID তৈরি করুন
     tran_id = f"TXN-{order.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}"
     order.tran_id = tran_id
     order.save(update_fields=['tran_id'])
 
+    # SSLCommerz client initialize করুন
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
 
-    # Callback URLs: sandbox vs production
+    # Callback URLs sandbox vs production
     if settings.SSLCOMMERZ['issandbox']:
         success_url = request.build_absolute_uri('/payment/success/')
         fail_url    = request.build_absolute_uri('/payment/fail/')
@@ -444,6 +449,7 @@ def initiate_payment(request, order_id):
         fail_url    = "https://www.petukhotel.com/payment/fail/"
         cancel_url  = "https://www.petukhotel.com/payment/cancel/"
 
+    # Gateway payload তৈরি করুন
     post_body = {
         'total_amount': str(order.price),
         'currency': "BDT",
@@ -465,6 +471,7 @@ def initiate_payment(request, order_id):
         'product_profile': "general",
     }
 
+    # Gateway এ session তৈরি করুন
     try:
         response = sslcz.createSession(post_body)
         if 'GatewayPageURL' not in response:
