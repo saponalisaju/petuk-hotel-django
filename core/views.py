@@ -418,20 +418,11 @@ def checkout_view(request):
 
 
 
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from decimal import Decimal
-from .models import CartOrder
-from sslcommerz_lib import SSLCOMMERZ  # আপনার SSLCommerz লাইব্রেরি import করুন
-from django.conf import settings
-
 @login_required
 def initiate_payment(request, order_id):
-    # URL থেকে আসা order_id দিয়ে order খুঁজুন
+    print("INITIATE_PAYMENT USER:", request.user.id, "ORDER_ID:", order_id)
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)
-
+    
     # checkout form data session থেকে নিন
     form = request.session.get('checkout_form', {})
 
@@ -478,6 +469,7 @@ def initiate_payment(request, order_id):
     # Gateway এ session তৈরি করুন
     try:
         response = sslcz.createSession(post_body)
+	    print("SSLC CREATE SESSION RESPONSE:", response)
         if 'GatewayPageURL' not in response:
             messages.error(request, f"GatewayPageURL missing: {response}")
             return redirect('core:checkout')
