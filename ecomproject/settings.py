@@ -23,10 +23,17 @@ CSRF_TRUSTED_ORIGINS = [
     'https://petuk-hotel-django.onrender.com',
 ]
 
-SECURE_SSL_REDIRECT = True # যদি TLS certificate থাকে 
-CSRF_COOKIE_SECURE = True 
-SESSION_COOKIE_SECURE = True 
-SESSION_COOKIE_SAMESITE = "None" # cross-site প্রয়োজন হলে
+# Security settings
+SECURE_SSL_REDIRECT = True   # একবারই রাখো
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "None"
+
+
 
 INSTALLED_APPS = [
     'jazzmin',
