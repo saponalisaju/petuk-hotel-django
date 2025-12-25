@@ -21,6 +21,7 @@ from taggit.models import Tag
 import cloudinary.uploader
 from django.http import HttpResponse
 import datetime
+import requests
 
 def index(request):
 	products = Product.objects.filter(product_status='published', featured=True)
@@ -416,6 +417,11 @@ def checkout_view(request):
 @login_required
 def initiate_payment(request):
     order_id = request.session.get('cart_order_id')
+	# 👉 এখানে বসান 
+    if not order_id: 
+        messages.error(request, "No order found in session") 
+        return redirect('core:checkout')
+
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)
 
     form = request.session.get('checkout_form', {})
@@ -550,7 +556,6 @@ def order_success_view(request, order_id):
     return render(request, 'core/async/order_success.html', {'order': order})
 
 
-
 @csrf_exempt
 def payment_ipn(request):
     tran_id = request.POST.get("tran_id")
@@ -564,7 +569,7 @@ def payment_ipn(request):
         params={
             "val_id": val_id,
             "store_id": settings.SSLCOMMERZ['store_id'],
-            "store_passwd": settings.SSLCOMMERZ['store_passwd'],
+            "store_pass": settings.SSLCOMMERZ['store_pass'],
             "v": 1,
             "format": "json",
         },
