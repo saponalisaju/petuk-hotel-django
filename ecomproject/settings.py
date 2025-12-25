@@ -1,5 +1,4 @@
 
-
 import environ
 from pathlib import Path
 import os
@@ -198,4 +197,5 @@ CKEDITOR_5_CONFIGS = {
     }
 }
 
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 

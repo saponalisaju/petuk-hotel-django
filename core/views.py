@@ -401,7 +401,7 @@ def checkout_view(request):
         request.session['cart_order_id'] = order.id
         request.session.pop('cart_data_object', None)
 
-        return redirect('core:initiate_payment')  # or 'core:initiate_payment' if namespaced
+        return redirect('core:initiate_payment', order_id=order.id)  # or 'core:initiate_payment' if namespaced
 
     # GET request → no form_data needed
     return render(request, 'core/checkout.html', {
@@ -415,7 +415,7 @@ def checkout_view(request):
 
 
 @login_required
-def initiate_payment(request):
+def initiate_payment(request, order_id):
     order_id = request.session.get('cart_order_id')
 	# 👉 এখানে বসান 
     if not order_id: 
