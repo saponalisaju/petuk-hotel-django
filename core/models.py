@@ -159,12 +159,10 @@ class Product(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(null=True, blank=True)
 
-    # update category
     def save(self, *args, **kwargs):
-        # যদি অবজেক্ট আগে থেকেই থাকে এবং নতুন ইমেজ সেট করা হয়
         if self.pk:
             old_product = Product.objects.filter(pk=self.pk).first()
-            if old_category and old_product.image != self.image:
+            if old_product and old_product.image and old_product.image != self.image:
                 try:
                     import cloudinary.uploader
                     cloudinary.uploader.destroy(old_product.image.public_id)
@@ -172,6 +170,7 @@ class Product(models.Model):
                     print("Cloudinary delete error...", e)
 
         super().save(*args, **kwargs)
+
 
     # delete category
     def delete(self, *args, **kwargs):
