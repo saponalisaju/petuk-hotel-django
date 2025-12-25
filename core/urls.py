@@ -38,11 +38,19 @@ urlpatterns = [
 	# Cart Page
 	path('cart/', views.cart_view, name='cart'),
 	path('checkout/', views.checkout_view, name='checkout'),
-	path('payment/initiate/', views.initiate_payment, name='initiate_payment'),
+
+	# Payment Flow
+	path('payment/initiate/<int:order_id>/', views.initiate_payment, name='initiate_payment'),
 	path('payment/success/', views.payment_success, name='payment_success'),
 	path('payment/fail/', views.payment_fail, name='payment_fail'),
 	path('payment/cancel/', views.payment_cancel, name='payment_cancel'),
+
+	# Order Confirmation
 	path('order/success/<int:order_id>/', views.order_success_view, name='order_success'),
+
+	# IPN Listener (important for SSLCommerz)
+	path('payment/ipn/', views.payment_ipn, name='payment_ipn'),
+
 
 	# Delete from cart
 	path('delete-from-cart/', views.delete_from_cart, name='delete-from-cart'),

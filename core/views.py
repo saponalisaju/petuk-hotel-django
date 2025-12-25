@@ -1,28 +1,26 @@
 from decimal import Decimal
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db.models import Avg, F, ExpressionWrapper, DecimalField
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
 from django.utils import timezone
 from django.contrib import messages
 
 from django.views.decorators.csrf import csrf_exempt
 
-
 # sslcommerz payment gateaway
 from sslcommerz_lib import SSLCOMMERZ
 from django.conf import settings
-from django.shortcuts import redirect
-
 from core.models import Product, Category, Vendor, CartOrder, CartOrderItems, \
-ProductImages, ProductReview, Wishlist, Address, ContactUs
+ProductImages, ProductReview, Wishlist, Address, ContactUs, SSLCommerzTransaction
 from core.forms import ProductReviewFrom
 from taggit.models import Tag
 import cloudinary.uploader
+from django.http import HttpResponse
+import datetime
 
 def index(request):
 	products = Product.objects.filter(product_status='published', featured=True)
@@ -472,28 +470,66 @@ def initiate_payment(request):
         return redirect('core:checkout')
 
 
+
 @csrf_exempt
 def payment_success(request):
+    # Gateway থেকে আসা data
     data = request.POST.dict() if request.method == "POST" else request.GET.dict()
     val_id = data.get('val_id')
     tran_id = data.get('tran_id')
 
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
+    
     try:
         validation = sslcz.validationTransactionOrder(val_id)
     except Exception as e:
         return render(request, "core/async/payment_fail.html", {"error": str(e)})
 
-    # VALID এবং VALIDATED দুটোই success ধরুন
-    if str(validation.get('status')).upper() in {"VALID", "VALIDATED"}:
+    status = str(validation.get('status')).upper()
+
+    # VALID বা VALIDATED হলে success ধরুন
+    if status in {"VALID", "VALIDATED"}:
         order = get_object_or_404(CartOrder, tran_id=tran_id)
+
+        # Amount match check
         if str(order.price) == str(validation.get('amount')):
             order.paid_status = True
             order.product_status = "paid"
             order.save(update_fields=['paid_status', 'product_status'])
-            return render(request, "core/async/payment_success.html", {"order": order, "response": validation})
 
+            # Transaction log save/update
+            SSLCommerzTransaction.objects.update_or_create(
+                tran_id=tran_id,
+                defaults={
+                    "order": order,
+                    "val_id": val_id,
+                    "amount": validation.get("amount"),
+                    "currency": validation.get("currency", "BDT"),
+                    "status": status,
+                    "bank_tran_id": validation.get("bank_tran_id"),
+                    "card_type": validation.get("card_type"),
+                    "card_brand": validation.get("card_brand"),
+                    "tran_date": validation.get("tran_date") or datetime.datetime.now(),
+                }
+            )
+
+            return render(
+                request,
+                "core/async/payment_success.html",
+                {"order": order, "response": validation}
+            )
+
+        else:
+            # Amount mismatch হলে fail দেখান
+            return render(
+                request,
+                "core/async/payment_fail.html",
+                {"response": validation, "error": "Amount mismatch"}
+            )
+
+    # অন্য status হলে fail
     return render(request, "core/async/payment_fail.html", {"response": validation})
+
 
 
 
@@ -514,6 +550,55 @@ def order_success_view(request, order_id):
     return render(request, 'core/async/order_success.html', {'order': order})
 
 
+
+@csrf_exempt
+def payment_ipn(request):
+    tran_id = request.POST.get("tran_id")
+    val_id = request.POST.get("val_id")
+
+    if not tran_id or not val_id:
+        return HttpResponse("Invalid IPN", status=400)
+
+    resp = requests.get(
+        settings.SSLCOMMERZ_VALIDATION_URL,
+        params={
+            "val_id": val_id,
+            "store_id": settings.SSLCOMMERZ['store_id'],
+            "store_passwd": settings.SSLCOMMERZ['store_passwd'],
+            "v": 1,
+            "format": "json",
+        },
+        timeout=10,
+    )
+    data = resp.json()
+
+    try:
+        order = CartOrder.objects.get(tran_id=tran_id)
+    except CartOrder.DoesNotExist:
+        return HttpResponse("Order not found", status=404)
+
+    if data.get("status") in ("VALID", "VALIDATED"):
+        order.paid_status = True
+        order.product_status = "paid"
+        order.save(update_fields=["paid_status", "product_status"])
+
+        SSLCommerzTransaction.objects.update_or_create(
+            tran_id=tran_id,
+            defaults={
+                "order": order,
+                "val_id": val_id,
+                "amount": data.get("amount"),
+                "currency": data.get("currency", "BDT"),
+                "status": data.get("status"),
+                "bank_tran_id": data.get("bank_tran_id"),
+                "card_type": data.get("card_type"),
+                "card_brand": data.get("card_brand"),
+                "tran_date": data.get("tran_date"),
+            }
+        )
+        return HttpResponse("OK", status=200)
+
+    return HttpResponse("NOT VALID", status=400)
 
 
 

@@ -148,6 +148,7 @@ SSLCOMMERZ = {
     'store_id': env('SSLC_STORE_ID'),
     'store_pass': env('SSLC_STORE_PASS'),
     'issandbox': env('SSLC_IS_SANDBOX'),  # False for production
+    'validation_url': env('SSLC_VALIDATION_URL'), # ✅ এখানে পড়বেন
 }
 
 LANGUAGE_CODE = 'bn'

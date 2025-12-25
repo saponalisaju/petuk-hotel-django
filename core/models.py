@@ -239,6 +239,22 @@ class CartOrderItems(models.Model):
         return mark_safe('<img src="/media/%s" width="50" height="50">' % (self.image))
 
 
+class SSLCommerzTransaction(models.Model): 
+    order = models.ForeignKey(CartOrder, on_delete=models.CASCADE, related_name="transactions")
+    tran_id = models.CharField(max_length=100, unique=True) 
+    val_id = models.CharField(max_length=100, blank=True, null=True) 
+    amount = models.DecimalField(max_digits=10, decimal_places=2) 
+    currency = models.CharField(max_length=10, default="BDT") 
+    status = models.CharField(max_length=50)  # VALID / FAILED / CANCELLED 
+    bank_tran_id = models.CharField(max_length=100, blank=True, null=True) 
+    card_type = models.CharField(max_length=50, blank=True, null=True) 
+    card_brand = models.CharField(max_length=50, blank=True, null=True) 
+    tran_date = models.DateTimeField(blank=True, null=True) 
+    created_at = models.DateTimeField(auto_now_add=True) 
+    
+    def __str__(self): 
+        return f"{self.tran_id} - {self.status}"
+
 
 ####### Product Review, Wishlist, Address #######
 
