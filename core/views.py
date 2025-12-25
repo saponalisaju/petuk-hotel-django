@@ -334,9 +334,10 @@ def update_cart(request):
 
 @login_required
 def checkout_view(request):
+    print("CHECKOUT_VIEW CALLED") 
+    print("SESSION CART:", request.session.get('cart_data_object'))
     cart = request.session.get('cart_data_object', {})
     if not cart:
-
         print("CART:", request.session.get('cart_data_object', {}))
         return redirect('core:cart')  # make sure 'cart' is named in urls.py
 		
