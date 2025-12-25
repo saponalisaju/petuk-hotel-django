@@ -1,12 +1,12 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 
-{% block title %}Sing Up{% endblock title %}
+{% block title %}সাইন আপ{% endblock title %}
 
 {% block content %}
 
 <div class="auth_wrapper">
-    <header class="auth_header">Sing up</header>
+    <header class="auth_header">সাইন আপ</header>
     <form method="POST" class="auth_form">
       {% csrf_token %}
       <div class="field">
@@ -65,9 +65,9 @@
         </div>
         {% endif %}
       </div>
-      <input type="submit" value="Sing up">
+      <input type="submit" value="সাইন আপ">
     </form>
-  <div class="sign-txt">Already have an account? <a href="{% url 'userauths:sing-in' %}">Sing in now</a></div>
+  <div class="sign-txt">ইতিমধ্যেই একটি অ্যাকাউন্ট আছে? <a href="{% url 'userauths:sing-in' %}">এখনই সাইন ইন করুন</a></div>
 </div>
 
 {% endblock content %}

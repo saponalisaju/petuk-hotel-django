@@ -1,17 +1,17 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 
-{% block title %}Sing In{% endblock title %}
+{% block title %}সাইন ইন{% endblock title %}
 
 {% block content %}
 
 <div class="auth_wrapper">
-    <header class="auth_header">Sing in</header>
+    <header class="auth_header">সাইন ইন</header>
     <form method="POST" class="auth_form">
       {% csrf_token %}
       <div class="field email">
         <div class="input-area">
-          <input type="text" required name="email" placeholder="Email Address">
+          <input type="text" required name="email" placeholder="ইমেইল ঠিকানা">
           <i class="icon fas fa-envelope"></i>
           {% if messages %}
           <i class="error error-icon fas fa-exclamation-circle"></i>
@@ -27,16 +27,14 @@
       </div>
       <div class="field password">
         <div class="input-area">
-          <input type="password" required name="password" placeholder="Password">
+          <input type="password" required name="password" placeholder="পাসওয়ার্ড">
           <i class="icon fas fa-lock"></i>
-          <!-- <i class="error error-icon fas fa-exclamation-circle"></i> -->
         </div>
-        <!-- <div class="error error-txt">Password can't be blank</div> -->
       </div>
-      <div class="pass-txt"><a href="#">Forgot password?</a></div>
-      <input type="submit" value="Sing in">
+      <div class="pass-txt"><a href="#">পাসওয়ার্ড ভুলে গেছেন?</a></div>
+      <input type="submit" value="সাইন ইন">
     </form>
-  <div class="sign-txt">Not yet member? <a href="{% url 'userauths:sign-up' %}">Sign up now</a></div>
+  <div class="sign-txt">এখনও সদস্য নন? <a href="{% url 'userauths:sign-up' %}">এখনই সাইন আপ করুন</a></div>
 </div>
 
 {% endblock content %}
