@@ -17,42 +17,43 @@
 
 <div class="checkout-container">
   <div class="shipping-form">
-    <h3>Shipping details</h3>
+    <h3>শিপিং তথ্য</h3>
     <form method="post">
       {% csrf_token %}
-      <label>Full name</label>
+      <label>পূর্ণ নাম</label>
       <input type="text" name="full_name" value="{{ form.full_name|default:'' }}" required>
 
-      <label>Phone</label>
+      <label>ফোন</label>
       <input type="text" name="phone" value="{{ form.phone|default:'' }}" required>
 
-      <label>Address</label>
+      <label>ঠিকানা</label>
       <input type="text" name="address" value="{{ form.address|default:'' }}" required>
 
-      <label>City</label>
+      <label>শহর</label>
       <input type="text" name="city" value="{{ form.city|default:'' }}">
 
-      <label>Country</label>
-      <input type="text" name="country" value="{{ form.country|default:'Bangladesh' }}">
+      <label>দেশ</label>
+      <input type="text" name="country" value="{{ form.country|default:'বাংলাদেশ' }}">
 
-      <label>Notes</label>
+      <label>নোট</label>
       <textarea name="notes">{{ form.notes|default:'' }}</textarea>
 
-      <button type="submit" class="btn-submit">Place order</button>
+      <button type="submit" class="btn-submit">অর্ডার করুন</button>
     </form>
   </div>
   <div class="order-summary">
-    <h3>Order summary</h3>
+    <h3>অর্ডার সারাংশ</h3>
     <ul>
       {% for pid, item in cart.items %}
-        <li>{{ item.title }} x {{ item.qty }} — {{ item.price|bangla_currency }}</li>
+        <li>{{ item.title }} × {{ item.qty }} — {{ item.price|bangla_currency }}</li>
       {% endfor %}
     </ul>
-    <p>Subtotal: {{ subtotal|bangla_currency }}</p>
-    <p>Shipping: {{ shipping|bangla_currency }}</p>
-    <p><strong>Total: {{ total|bangla_currency }} </strong></p>
+    <p>সাবটোটাল: {{ subtotal|bangla_currency }}</p>
+    <p>শিপিং: {{ shipping|bangla_currency }}</p>
+    <p><strong>মোট: {{ total|bangla_currency }} </strong></p>
   </div>
 </div>
+
 
   
 {% endblock content %}
