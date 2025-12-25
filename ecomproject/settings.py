@@ -179,16 +179,15 @@ AUTH_USER_MODEL = 'userauths.User'
 
 CKEDITOR_5_CONFIGS = {
     'default': {
-        'skin': 'moono',
+        'toolbar': [
+            'heading', '|',
+            'bold', 'italic', 'link', 'underline', 'strikethrough', '|',
+            'bulletedList', 'numberedList', 'blockQuote', '|',
+            'insertTable', 'mediaEmbed', 'undo', 'redo', 'imageUpload'
+        ],
+        'height': 300,
+        'width': '100%',
     }
 }
 
-CKEDITOR_5_CONFIGS = { 
-    'default': { 
-        'toolbar': [ 
-            'heading', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough', '|', 
-            'bulletedList', 'numberedList', 'blockQuote', '|', 'insertTable', 'mediaEmbed', 'undo', 'redo' 
-            ], 
-            'height': 300, 'width': '100%', 
-    }, 
-}
+
