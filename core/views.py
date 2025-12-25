@@ -336,8 +336,9 @@ def update_cart(request):
 def checkout_view(request):
     cart = request.session.get('cart_data_object', {})
     if not cart:
-        return redirect('core:cart')  # make sure 'cart' is named in urls.py
 		print("CART:", request.session.get('cart_data_object', {}))
+        return redirect('core:cart')  # make sure 'cart' is named in urls.py
+		
 
     subtotal = sum(Decimal(str(item['price'])) * int(item['qty']) for item in cart.values())
     shipping = Decimal('10.00') if subtotal > 0 else Decimal('0.00')
