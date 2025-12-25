@@ -469,7 +469,7 @@ def initiate_payment(request, order_id):
     # Gateway এ session তৈরি করুন
     try:
         response = sslcz.createSession(post_body)
-	    print("SSLC CREATE SESSION RESPONSE:", response)
+        print("SSLC CREATE SESSION RESPONSE:", response)
         if 'GatewayPageURL' not in response:
             messages.error(request, f"GatewayPageURL missing: {response}")
             return redirect('core:checkout')

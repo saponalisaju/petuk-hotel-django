@@ -1,4 +1,3 @@
-
 import environ
 from pathlib import Path
 import os
@@ -22,11 +21,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.petukhotel.com',
     'https://petuk-hotel-django.onrender.com',
 ]
-
-SECURE_SSL_REDIRECT = True # যদি TLS certificate থাকে 
-CSRF_COOKIE_SECURE = True 
-SESSION_COOKIE_SECURE = True 
-SESSION_COOKIE_SAMESITE = "None" # cross-site প্রয়োজন হলে
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -148,7 +142,6 @@ SSLCOMMERZ = {
     'store_id': env('SSLC_STORE_ID'),
     'store_pass': env('SSLC_STORE_PASS'),
     'issandbox': env('SSLC_IS_SANDBOX'),  # False for production
-    'validation_url': env('SSLC_VALIDATION_URL'), # ✅ এখানে পড়বেন
 }
 
 LANGUAGE_CODE = 'bn'
@@ -187,15 +180,12 @@ AUTH_USER_MODEL = 'userauths.User'
 CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': [
-            'heading', '|',
-            'bold', 'italic', 'link', 'underline', 'strikethrough', '|',
+            'heading', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough', '|',
             'bulletedList', 'numberedList', 'blockQuote', '|',
-            'insertTable', 'mediaEmbed', 'undo', 'redo', 'imageUpload'
+            'insertTable', 'mediaEmbed', 'undo', 'redo'
         ],
         'height': 300,
         'width': '100%',
-    }
+    },
 }
-
-SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
