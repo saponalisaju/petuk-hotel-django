@@ -1,3 +1,4 @@
+
 import environ
 from pathlib import Path
 import os
@@ -21,6 +22,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.petukhotel.com',
     'https://petuk-hotel-django.onrender.com',
 ]
+
+SECURE_SSL_REDIRECT = True # যদি TLS certificate থাকে 
+CSRF_COOKIE_SECURE = True 
+SESSION_COOKIE_SECURE = True 
+SESSION_COOKIE_SAMESITE = "None" # cross-site প্রয়োজন হলে
 
 INSTALLED_APPS = [
     'jazzmin',
