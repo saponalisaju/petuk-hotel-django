@@ -101,7 +101,7 @@
                     {% if request.user.is_authenticated %}
                     <button style="border-style: none;" class="heart-icon add-to-wishlist" data-product-item="{{ product.id }}"><span class="icon_heart_alt"></span></button>
                     {% else %}
-                    <a href="{% url 'userauths:sing-in' %}" class="heart-icon"><span class="icon_heart_alt"></span></a>
+                    <a href="{% url 'userauths:sign-in' %}" class="heart-icon"><span class="icon_heart_alt"></span></a>
                     {% endif %}
                     <ul>
                         <li><b>প্রাপ্যতা</b> <span>{{ product.stock_count|bangla_number }} পণ্য স্টকে আছে</span></li>

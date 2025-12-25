@@ -445,9 +445,9 @@ def initiate_payment(request, order_id):
         cancel_url  = "https://www.petukhotel.com/payment/cancel/"
 
     post_body = {
-        'total_amount': str(cart_total),
+        'total_amount': str(order.price),
         'currency': "BDT",
-        'tran_id': tran_id,
+        'tran_id': order.tran_id,
         'success_url': success_url,
         'fail_url': fail_url,
         'cancel_url': cancel_url,
@@ -479,63 +479,31 @@ def initiate_payment(request, order_id):
 
 @csrf_exempt
 def payment_success(request):
-    # Gateway থেকে আসা data
     data = request.POST.dict() if request.method == "POST" else request.GET.dict()
     val_id = data.get('val_id')
     tran_id = data.get('tran_id')
 
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
-    
-    try:
-        validation = sslcz.validationTransactionOrder(val_id)
-    except Exception as e:
-        return render(request, "core/async/payment_fail.html", {"error": str(e)})
-
+    validation = sslcz.validationTransactionOrder(val_id)
     status = str(validation.get('status')).upper()
 
-    # VALID বা VALIDATED হলে success ধরুন
-    if status in {"VALID", "VALIDATED"}:
-        order = get_object_or_404(CartOrder, tran_id=tran_id)
+    if not tran_id:
+        tran_id = validation.get('tran_id')
 
-        # Amount match check
-        if str(order.price) == str(validation.get('amount')):
+    order = get_object_or_404(CartOrder, tran_id=tran_id)  # user filter বাদ দিন
+
+    if status in {"VALID", "VALIDATED"}:
+        # Amount check
+        if Decimal(str(order.price)) == Decimal(str(validation.get('amount'))):
             order.paid_status = True
             order.product_status = "paid"
             order.save(update_fields=['paid_status', 'product_status'])
-
-            # Transaction log save/update
-            SSLCommerzTransaction.objects.update_or_create(
-                tran_id=tran_id,
-                defaults={
-                    "order": order,
-                    "val_id": val_id,
-                    "amount": validation.get("amount"),
-                    "currency": validation.get("currency", "BDT"),
-                    "status": status,
-                    "bank_tran_id": validation.get("bank_tran_id"),
-                    "card_type": validation.get("card_type"),
-                    "card_brand": validation.get("card_brand"),
-                    "tran_date": validation.get("tran_date") or datetime.datetime.now(),
-                }
-            )
-
-            return render(
-                request,
-                "core/async/payment_success.html",
-                {"order": order, "response": validation}
-            )
-
+            # Transaction log update_or_create...
+            return render(request, "core/async/payment_success.html", {"order": order, "response": validation})
         else:
-            # Amount mismatch হলে fail দেখান
-            return render(
-                request,
-                "core/async/payment_fail.html",
-                {"response": validation, "error": "Amount mismatch"}
-            )
+            return render(request, "core/async/payment_fail.html", {"response": validation, "error": "Amount mismatch"})
 
-    # অন্য status হলে fail
     return render(request, "core/async/payment_fail.html", {"response": validation})
-
 
 
 
@@ -560,7 +528,6 @@ def order_success_view(request, order_id):
 def payment_ipn(request):
     tran_id = request.POST.get("tran_id")
     val_id = request.POST.get("val_id")
-
     if not tran_id or not val_id:
         return HttpResponse("Invalid IPN", status=400)
 
@@ -569,7 +536,7 @@ def payment_ipn(request):
         params={
             "val_id": val_id,
             "store_id": settings.SSLCOMMERZ['store_id'],
-            "store_pass": settings.SSLCOMMERZ['store_pass'],
+            "store_passwd": settings.SSLCOMMERZ['store_passwd'],
             "v": 1,
             "format": "json",
         },
@@ -583,9 +550,10 @@ def payment_ipn(request):
         return HttpResponse("Order not found", status=404)
 
     if data.get("status") in ("VALID", "VALIDATED"):
-        order.paid_status = True
-        order.product_status = "paid"
-        order.save(update_fields=["paid_status", "product_status"])
+        if not order.paid_status:
+            order.paid_status = True
+            order.product_status = "paid"
+            order.save(update_fields=["paid_status", "product_status"])
 
         SSLCommerzTransaction.objects.update_or_create(
             tran_id=tran_id,
@@ -604,6 +572,7 @@ def payment_ipn(request):
         return HttpResponse("OK", status=200)
 
     return HttpResponse("NOT VALID", status=400)
+
 
 
 
