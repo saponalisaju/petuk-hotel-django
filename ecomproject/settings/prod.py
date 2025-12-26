@@ -1,5 +1,6 @@
 from .base import *
 import os
+import dj_database_url
 
 DEBUG = False
 SECRET_KEY = get_required("DJANGO_SECRET_KEY")
@@ -8,7 +9,6 @@ ALLOWED_HOSTS = split_csv("ALLOWED_HOSTS", "petukhotel.com,www.petukhotel.com,pe
 CSRF_TRUSTED_ORIGINS = split_csv("CSRF_TRUSTED_ORIGINS", "https://petukhotel.com,https://www.petukhotel.com,https://petuk-hotel-django.onrender.com")
 
 # Database
-import dj_database_url
 DATABASES = {
     "default": dj_database_url.config(
         default=get_required("DATABASE_URL"),
@@ -43,5 +43,3 @@ SSLCOMMERZ_VALIDATION_URL = os.environ.get(
     "SSLC_VALIDATION_URL",
     "https://securepay.sslcommerz.com/validator/api/validationserverAPI.php"
 )
-
-
