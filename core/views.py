@@ -10,6 +10,9 @@ from django.utils import timezone
 from django.contrib import messages
 from ecomproject.settings.base import abs_url
 
+import logging
+logger = logging.getLogger(__name__) 
+
 from django.views.decorators.csrf import csrf_exempt
 
 # sslcommerz payment gateaway
@@ -275,7 +278,6 @@ def cart_view(request):
     return render(request, 'core/cart.html', context)
 
 
-
 def delete_from_cart(request):
     product_id = str(request.GET.get('id'))
     if 'cart_data_object' in request.session:
@@ -329,8 +331,6 @@ def update_cart(request):
         'data': context,
         'totalcartitems': len(request.session.get('cart_data_object', {})),
     })
-
-
 
 
 @login_required
@@ -418,7 +418,6 @@ def checkout_view(request):
     })
 
 
-
 @login_required
 def initiate_payment(request, order_id):
     print("INITIATE_PAYMENT USER:", request.user.id, "ORDER_ID:", order_id)
@@ -432,10 +431,17 @@ def initiate_payment(request, order_id):
 
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
 
-    success_url = abs_url("/payment/success/")
-    fail_url    = abs_url("/payment/fail/")
-    cancel_url  = abs_url("/payment/cancel/")
-    ipn_url     = abs_url("/payment/ipn/")
+    if settings.SSLCOMMERZ['issandbox']:
+        success_url = request.build_absolute_uri('/payment/success/')
+        fail_url    = request.build_absolute_uri('/payment/fail/')
+        cancel_url  = request.build_absolute_uri('/payment/cancel/')
+        ipn_url     = request.build_absolute_uri('/payment/ipn/')
+    else:
+        success_url = abs_url("/payment/success/")
+        fail_url    = abs_url("/payment/fail/")
+        cancel_url  = abs_url("/payment/cancel/")
+        ipn_url     = abs_url("/payment/ipn/")
+
 
     post_body = {
         'total_amount': str(order.price),
@@ -461,7 +467,7 @@ def initiate_payment(request, order_id):
 
     try:
         response = sslcz.createSession(post_body)
-        print("SSLC CREATE SESSION RESPONSE:", response)
+        logger.info("SSLC CREATE SESSION RESPONSE: %s", response)
         url = response.get('GatewayPageURL')
         if not url:
             messages.error(request, f"GatewayPageURL missing: {response}")
@@ -517,7 +523,8 @@ def payment_ipn(request):
     if not tran_id or not val_id:
         return HttpResponse("Invalid IPN", status=400)
 
-    resp = requests.get(
+    try:
+        resp = requests.get(
         settings.SSLCOMMERZ_VALIDATION_URL,
         params={
             "val_id": val_id,
@@ -527,8 +534,10 @@ def payment_ipn(request):
             "format": "json",
         },
         timeout=10,
-    )
-    data = resp.json()
+        )
+        data = resp.json()
+    except:
+        return HttpResponse(f"Validation error: {e}", status=500)
 
     try:
         order = CartOrder.objects.get(tran_id=tran_id)
@@ -563,7 +572,6 @@ def payment_ipn(request):
 def order_success_view(request, order_id):
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)
     return render(request, 'core/async/order_success.html', {'order': order})
-
 
 
 @login_required
@@ -604,6 +612,7 @@ def add_to_wishlist(request):
 
 	return JsonResponse(context)
 
+
 def remove_from_wishlist(request):
 	product_id = request.GET['id']
 	wishlist = Wishlist.objects.filter(user=request.user)
@@ -619,8 +628,10 @@ def remove_from_wishlist(request):
 	data = render_to_string('core/async/wishlist-list.html', context)
 	return JsonResponse({'data': data, 'wishlist': qs_json})
 
+
 def contact(request):
 	return render(request, 'core/contact.html')
+
 
 def ajax_contact_form(request):
 	name = request.GET['name']
@@ -638,6 +649,7 @@ def ajax_contact_form(request):
 	}
 
 	return JsonResponse({'data': data})
+
 
 def about(request):
 	return render(request, 'core/about.html')
