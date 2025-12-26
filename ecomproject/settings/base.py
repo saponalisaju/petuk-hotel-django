@@ -18,8 +18,10 @@ def split_csv(name: str, default: str = "") -> list[str]:
     raw = os.environ.get(name, default)
     return [i.strip() for i in raw.split(",") if i.strip()]
 
-DEBUG = os.environ.get("DEBUG", default=False)
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
+# Base settings
+DEBUG = os.environ.get("DEBUG", "True").lower() in {"true", "1", "yes"}
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "insecure-dev-key")  # fallback for local dev
 
 
 LANGUAGE_CODE = "bn"
