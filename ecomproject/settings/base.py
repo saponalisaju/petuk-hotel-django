@@ -18,8 +18,9 @@ def split_csv(name: str, default: str = "") -> list[str]:
     raw = os.environ.get(name, default)
     return [i.strip() for i in raw.split(",") if i.strip()]
 
-DEBUG = False
-SECRET_KEY = "dev-placeholder"
+DEBUG = os.environ.get("DEBUG", default=False)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
 
 LANGUAGE_CODE = "bn"
 TIME_ZONE = "Asia/Dhaka"
