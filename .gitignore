@@ -29,3 +29,5 @@ Thumbs.db
 *.coverage
 coverage.xml
 .pytest_cache/
+# Ignore dev settings
+ecomproject/settings/dev.py
