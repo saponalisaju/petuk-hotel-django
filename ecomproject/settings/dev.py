@@ -1,33 +1,54 @@
-# ecomproject/settings/dev.py
-from .base import *
-import os
+from .base import * 
+import environ 
+from pathlib import Path 
 
-DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
+BASE_DIR = Path(__file__).resolve().parent.parent.parent 
 
-# Local PostgreSQL (or sqlite if preferred)
+env = environ.Env() 
+environ.Env.read_env(BASE_DIR / ".env")
+
+DEBUG = env.bool("DEBUG", default=True) 
+SECRET_KEY = env("DJANGO_SECRET_KEY", default="unsafe-dev-key")
+
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000"]
+
+# Database (Postgres for dev)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "petuk_local_db"),
-        "USER": os.getenv("DB_USER", "saponali"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "your_dev_password"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
     }
 }
 
-# Cookies (dev: no HTTPS)
-CSRF_COOKIE_SECURE = False
+# Security flags relaxed for dev
 SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SAMESITE = "Lax"
 
-# SSLCommerz sandbox
-SSLCOMMERZ["issandbox"] = True
-SSLCOMMERZ_VALIDATION_URL = "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# Optional dev tools
-INSTALLED_APPS += ["debug_toolbar"]
-MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE
-INTERNAL_IPS = ["127.0.0.1"]
+SITE_SCHEME = env("SITE_SCHEME", default="http")
+SITE_DOMAIN = env("SITE_DOMAIN", default="127.0.0.1:8000")
+
+# Cloudinary (dev uploads)
+CLOUDINARY_CLOUD_NAME = env("CLOUDINARY_CLOUD_NAME", default="")
+CLOUDINARY_API_KEY = env("CLOUDINARY_API_KEY", default="")
+CLOUDINARY_API_SECRET = env("CLOUDINARY_API_SECRET", default="")
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+# SSLCommerz (sandbox mode)
+SSLCOMMERZ = {
+    "store_id": env("SSLC_STORE_ID", default=""),
+    "store_pass": env("SSLC_STORE_PASS", default=""),
+    "issandbox": env.bool("SSLC_IS_SANDBOX", default=True),
+}
+SSLCOMMERZ_VALIDATION_URL = env(
+    "SSLC_VALIDATION_URL",
+    default="https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php"
+)

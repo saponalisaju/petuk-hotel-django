@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.db import transaction
 from django.utils import timezone
 from django.contrib import messages
+from ecomproject.settings.base import abs_url
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -422,29 +423,20 @@ def checkout_view(request):
 def initiate_payment(request, order_id):
     print("INITIATE_PAYMENT USER:", request.user.id, "ORDER_ID:", order_id)
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)
-    
-    # checkout form data session থেকে নিন
+
     form = request.session.get('checkout_form', {})
 
-    # Unique transaction ID তৈরি করুন
     tran_id = f"TXN-{order.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}"
     order.tran_id = tran_id
     order.save(update_fields=['tran_id'])
 
-    # SSLCommerz client initialize করুন
     sslcz = SSLCOMMERZ(settings.SSLCOMMERZ)
 
-    # Callback URLs sandbox vs production
-    if settings.SSLCOMMERZ['issandbox']:
-        success_url = request.build_absolute_uri('/payment/success/')
-        fail_url    = request.build_absolute_uri('/payment/fail/')
-        cancel_url  = request.build_absolute_uri('/payment/cancel/')
-    else:
-        success_url = "https://www.petukhotel.com/payment/success/"
-        fail_url    = "https://www.petukhotel.com/payment/fail/"
-        cancel_url  = "https://www.petukhotel.com/payment/cancel/"
+    success_url = abs_url("/payment/success/")
+    fail_url    = abs_url("/payment/fail/")
+    cancel_url  = abs_url("/payment/cancel/")
+    ipn_url     = abs_url("/payment/ipn/")
 
-    # Gateway payload তৈরি করুন
     post_body = {
         'total_amount': str(order.price),
         'currency': "BDT",
@@ -452,6 +444,7 @@ def initiate_payment(request, order_id):
         'success_url': success_url,
         'fail_url': fail_url,
         'cancel_url': cancel_url,
+        'ipn_url': ipn_url,   # ✅ include IPN
         'emi_option': 0,
         'cus_name': form.get('full_name') or request.user.get_full_name() or request.user.username,
         'cus_email': request.user.email or 'customer@example.com',
@@ -466,18 +459,17 @@ def initiate_payment(request, order_id):
         'product_profile': "general",
     }
 
-    # Gateway এ session তৈরি করুন
     try:
         response = sslcz.createSession(post_body)
         print("SSLC CREATE SESSION RESPONSE:", response)
-        if 'GatewayPageURL' not in response:
+        url = response.get('GatewayPageURL')
+        if not url:
             messages.error(request, f"GatewayPageURL missing: {response}")
             return redirect('core:checkout')
-        return redirect(response['GatewayPageURL'])
+        return redirect(url)
     except Exception as e:
         messages.error(request, f"Payment initiation failed: {e}")
         return redirect('core:checkout')
-
 
 
 @csrf_exempt
@@ -508,24 +500,15 @@ def payment_success(request):
 
     return render(request, "core/async/payment_fail.html", {"response": validation})
 
-
-
 @csrf_exempt
 def payment_fail(request):
     # Update status = "Cancelled"
     return render(request, "core/async/payment_fail.html")
 
-
 @csrf_exempt
 def payment_cancel(request):
     # Update status = "Cancelled"
     return render(request, "core/async/payment_cancel.html")
-
-@login_required
-def order_success_view(request, order_id):
-    order = get_object_or_404(CartOrder, id=order_id, user=request.user)
-    return render(request, 'core/async/order_success.html', {'order': order})
-
 
 @csrf_exempt
 def payment_ipn(request):
@@ -539,7 +522,7 @@ def payment_ipn(request):
         params={
             "val_id": val_id,
             "store_id": settings.SSLCOMMERZ['store_id'],
-            "store_passwd": settings.SSLCOMMERZ['store_passwd'],
+            "store_pass": settings.SSLCOMMERZ['store_pass'],
             "v": 1,
             "format": "json",
         },
@@ -576,6 +559,10 @@ def payment_ipn(request):
 
     return HttpResponse("NOT VALID", status=400)
 
+@login_required
+def order_success_view(request, order_id):
+    order = get_object_or_404(CartOrder, id=order_id, user=request.user)
+    return render(request, 'core/async/order_success.html', {'order': order})
 
 
 

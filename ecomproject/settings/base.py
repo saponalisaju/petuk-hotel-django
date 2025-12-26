@@ -1,30 +1,59 @@
-# ecomproject/settings/base.py
 import os
 from pathlib import Path
 
+# BASE_DIR → project root (django-ecommerce/)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "insecure-dev-key")
-DEBUG = False  # override in dev.py
+# Helpers
+def get_bool(name: str, default: str = "False") -> bool:
+    return os.environ.get(name, default).strip().lower() in {"true", "1", "yes", "on"}
 
-ALLOWED_HOSTS = []
+def get_required(name: str) -> str:
+    val = os.environ.get(name)
+    if not val:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return val
+
+def split_csv(name: str, default: str = "") -> list[str]:
+    raw = os.environ.get(name, default)
+    return [i.strip() for i in raw.split(",") if i.strip()]
+
+DEBUG = False
+SECRET_KEY = "dev-placeholder"
+
+LANGUAGE_CODE = "bn"
+TIME_ZONE = "Asia/Dhaka"
+USE_I18N = True
+USE_TZ = True
 
 INSTALLED_APPS = [
+    # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # your apps
+
+    # third-party
+    "taggit",
+    "django_ckeditor_5",
+    "easyaudit",
+
+    # custom apps
     "core",
-    "payments",
+    "userauths",
+    "blog",
+
+    # cloudinary
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # hashed static in prod
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -34,11 +63,23 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "ecomproject.urls"
 WSGI_APPLICATION = "ecomproject.wsgi.application"
+ASGI_APPLICATION = "ecomproject.asgi.application"
 
+# Static files
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Media files
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [BASE_DIR / "templates"],  # project root/templates/
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -46,47 +87,37 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ]
+            ],
         },
-    }
+    },
 ]
 
-# Default DB → override in dev/prod
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+LOGIN_URL = 'userauths:sign-in'  # check spelling in your urls.py
+
+AUTH_USER_MODEL = 'userauths.User'
+
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': [
+            'heading', '|',
+            'bold', 'italic', 'link', 'underline', 'strikethrough', '|',
+            'bulletedList', 'numberedList', 'blockQuote', '|',
+            'insertTable', 'mediaEmbed', 'undo', 'redo', 'imageUpload'
+        ],
+        'height': 300,
+        'width': '100%',
     }
 }
 
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "Asia/Dhaka"
-USE_I18N = True
-USE_TZ = True
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# settings/base.py বা utils.py
+SITE_SCHEME = os.environ.get("SITE_SCHEME", "https")
+SITE_DOMAIN = os.environ.get("SITE_DOMAIN", "localhost:8000")
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+def abs_url(path: str) -> str:
+    return f"{SITE_SCHEME}://{SITE_DOMAIN}{path}"
 
-# Logging (basic)
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "root": {"handlers": ["console"], "level": "INFO"},
-}
-
-# SSLCommerz (read from env in prod)
-SSLCOMMERZ = {
-    "store_id": os.getenv("SSLC_STORE_ID"),
-    "store_passwd": os.getenv("SSLC_STORE_PASS"),
-    "issandbox": os.getenv("SSLC_SANDBOX", "True") == "True",  # override in prod
-}
-SSLCOMMERZ_VALIDATION_URL = os.getenv(
-    "SSLC_VALIDATION_URL",
-    "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php",
-)

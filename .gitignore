@@ -1,4 +1,31 @@
-
-/staticfiles/
-
+# Environment & secrets
 .env
+*.env
+/etc/secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Static & media
+staticfiles/
+media/
+
+# IDE/editor
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs & cache
+*.log
+*.coverage
+coverage.xml
+.pytest_cache/
